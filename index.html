@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Time Machine — Panth Shah Portfolio</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for decade thematic typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Courier+Prime:ital,wght@0,700;1,400&family=Megrim&family=Orbitron:wght@700&family=Press+Start+2P&family=Share+Tech+Mono&family=Special+Elite&family=Syne:wght@700&family=Unbounded:wght@600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        t1900: ['Cinzel', 'serif'],
+                        t1910: ['Special Elite', 'cursive'],
+                        t1920: ['Cinzel', 'serif'],
+                        t1930: ['Courier Prime', 'monospace'],
+                        t1940: ['Courier Prime', 'monospace'],
+                        t1950: ['Press Start 2P', 'monospace'],
+                        t1960: ['Syne', 'sans-serif'],
+                        t1970: ['Syne', 'sans-serif'],
+                        t1980: ['Megrim', 'sans-serif'],
+                        t1990: ['Share Tech Mono', 'monospace'],
+                        t2000: ['Unbounded', 'sans-serif'],
+                        t2010: ['Unbounded', 'sans-serif'],
+                        t2020: ['Orbitron', 'sans-serif'],
+                        t2030: ['Orbitron', 'sans-serif'],
+                        t2050: ['Orbitron', 'sans-serif'],
+                        t2090: ['Orbitron', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.05);
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.6);
+        }
+        .glow-btn {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+        .glow-btn:hover {
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.6);
+            transform: translateY(-2px);
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+        .bg-glow {
+            animation: pulseGlow 8s infinite alternate;
+        }
+        .text-neon {
+            text-shadow: 0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        .wave-bar {
+            transition: height 0.1s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-x-hidden min-h-screen font-sans transition-colors duration-500">
+
+    <!-- Interactive Background Canvas -->
+    <canvas id="bgCanvas" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-30 dark:opacity-40"></canvas>
+    
+    <!-- Dynamic Ambient Light/Dark Glow Overlays -->
+    <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-400/10 dark:bg-indigo-900/20 blur-[120px] -z-20 bg-glow"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-fuchsia-400/10 dark:bg-fuchsia-900/20 blur-[120px] -z-20 bg-glow" style="animation-delay: -4s;"></div>
+
+    <!-- MAIN HEADER UTILITY NAV BAR -->
+    <header class="fixed top-0 left-0 w-full z-50 px-6 py-4 flex justify-between items-center bg-white/70 dark:bg-slate-950/40 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/50">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+            <i class="fa-solid fa-hourglass-half text-indigo-600 dark:text-indigo-400 text-xl animate-spin" style="animation-duration: 10s;"></i>
+            <span class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-fuchsia-600 dark:from-indigo-400 dark:to-fuchsia-500 tracking-wider">CHRONOS_LABS</span>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- Audio Controller Panel -->
+            <div id="audioControls" class="flex items-center gap-3 bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/50 px-4 py-1.5 rounded-full shadow-sm dark:shadow-none">
+                <button onclick="toggleMute()" class="text-indigo-600 dark:text-indigo-400 hover:scale-105 transition" id="muteBtn" title="Play/Mute Theme Synthesizer">
+                    <i class="fa-solid fa-volume-xmark" id="muteIcon"></i>
+                </button>
+                <div class="h-4 w-[1px] bg-slate-300 dark:bg-slate-700"></div>
+                <span id="nowPlayingText" class="text-xs font-mono text-slate-600 dark:text-slate-400 max-w-[150px] truncate">System Muted</span>
+                <div class="flex gap-0.5 items-end h-3" id="soundBars">
+                    <div class="w-0.5 h-1 bg-indigo-500 wave-bar"></div>
+                    <div class="w-0.5 h-2 bg-indigo-500 wave-bar"></div>
+                    <div class="w-0.5 h-1 bg-indigo-500 wave-bar"></div>
+                </div>
+            </div>
+            
+            <!-- Global Light/Dark Toggle -->
+            <button onclick="toggleTheme()" class="p-2.5 rounded-full bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-amber-500 dark:text-amber-400" id="themeBtn">
+                <i class="fa-solid fa-sun" id="themeIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- SECTION 1: LANDING PAGE -->
+    <main id="landingPage" class="min-h-screen flex flex-col justify-center items-center px-4 relative z-10 pt-20">
+        <div class="max-w-4xl text-center space-y-8 px-2">
+            <div class="space-y-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 text-xs uppercase tracking-widest font-semibold shadow-sm">
+                    Interactive Historiography Engine
+                </div>
+                <h1 class="text-5xl md:text-8xl font-black tracking-tight text-slate-900 dark:text-white drop-shadow-sm">
+                    Digital Time Machine
+                </h1>
+                <p class="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
+                    Explore 115 years of computational breakthrough, societal evolution, and raw creative musical expression. Built with a fully active, era-responsive procedural audio synthesizer featuring real history-making English hits.
+                </p>
+            </div>
+
+            <!-- Portfolio Info Card -->
+            <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-xl mx-auto space-y-4 shadow-xl">
+                <div class="flex items-center justify-center gap-4">
+                    <div class="h-12 w-12 rounded-full bg-gradient-to-tr from-indigo-500 to-fuchsia-500 flex items-center justify-center font-bold text-lg text-white">
+                        PS
+                    </div>
+                    <div class="text-left">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white tracking-wide">Panth Shah</h3>
+                        <p class="text-xs text-indigo-600 dark:text-indigo-400 font-mono">Full Stack Engineering Specialist</p>
+                    </div>
+                </div>
+                
+                <div class="h-[1px] bg-slate-200 dark:bg-slate-800/80 w-full"></div>
+                
+                <div class="flex flex-wrap justify-center gap-4 text-sm font-mono">
+                    <a href="https://www.linkedin.com/in/panth-shah-445144389" target="_blank" class="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <i class="fa-brands fa-linkedin text-lg"></i> LinkedIn
+                    </a>
+                    <a href="https://github.com/PanthShah2007" target="_blank" class="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <i class="fa-brands fa-github text-lg"></i> GitHub
+                    </a>
+                    <a href="mailto:panthshah2007@gmail.com" class="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <i class="fa-solid fa-envelope text-lg"></i> Email
+                    </a>
+                </div>
+            </div>
+
+            <div class="pt-4">
+                <button onclick="enterTimeMachine()" class="glow-btn px-8 py-4 bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500 text-white font-bold rounded-xl text-lg tracking-wider transition-all duration-300 uppercase">
+                    Initialize Chronicles <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- SECTION 2: CONTENT VIEW (SPA) -->
+    <main id="timeMachinePage" class="hidden min-h-screen pt-20 flex flex-col md:flex-row relative z-10">
+        
+        <!-- SIDEBAR INDEX PANELS -->
+        <aside class="w-full md:w-80 bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800/60 p-6 flex flex-col justify-between shrink-0">
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Epoch Voyager</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Pick an era or year to load historical timelines</p>
+                </div>
+
+                <!-- Decade Timeline Slider -->
+                <div class="space-y-2 bg-slate-100 dark:bg-slate-950/80 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div class="flex justify-between text-xs font-mono text-indigo-600 dark:text-indigo-400">
+                        <span>1910</span>
+                        <span id="sliderYearLabel" class="font-bold">1980</span>
+                        <span>2026</span>
+                    </div>
+                    <input type="range" id="decadeSlider" min="0" max="14" value="7" step="1" 
+                           class="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                           oninput="onSliderChange(this.value)">
+                </div>
+
+                <!-- Vertical Decade Navigation Menu -->
+                <nav class="space-y-2 max-h-[40vh] md:max-h-[50vh] overflow-y-auto pr-1" id="decadeNavList">
+                    <!-- Injected dynamically via JS -->
+                </nav>
+            </div>
+
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-800/80 mt-6 hidden md:block">
+                <div class="flex justify-between items-center text-xs text-slate-400 dark:text-slate-500 font-mono">
+                    <span>Voyage Duration:</span>
+                    <span class="text-indigo-600 dark:text-indigo-400" id="liveTime">00:00:00</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEWPORT -->
+        <section class="flex-1 p-6 md:p-12 overflow-y-auto max-h-[calc(100vh-5rem)]" id="contentViewport">
+            <article class="max-w-4xl mx-auto space-y-12">
+                
+                <!-- Decade Header Card -->
+                <header class="border-b border-slate-200 dark:border-slate-800/80 pb-8 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <span id="decadeSpan" class="text-xs font-mono text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-widest">Active Era Parameters</span>
+                            <h2 id="decadeTitle" class="text-5xl md:text-7xl font-black text-slate-900 dark:text-white">1980s</h2>
+                        </div>
+                        <div class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-right">
+                            <p class="text-xs text-slate-500 font-mono">Soundscape</p>
+                            <p id="eraMusicLabel" class="text-sm font-semibold text-fuchsia-600 dark:text-fuchsia-400 font-mono">Synthwave Horizon</p>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Detailed History Essays -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <div class="lg:col-span-2 space-y-8">
+                        <section class="space-y-4">
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                                <i class="fa-solid fa-earth-americas text-indigo-600 dark:text-indigo-400 text-lg"></i> Historical Overview &amp; Geopolitics
+                            </h3>
+                            <div id="epochOverview" class="text-slate-700 dark:text-slate-300 leading-relaxed text-base space-y-4">
+                                <!-- Loaded dynamically -->
+                            </div>
+                        </section>
+
+                        <section class="space-y-4">
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                                <i class="fa-solid fa-industry text-indigo-600 dark:text-indigo-400 text-lg"></i> Technological Deep-Dive
+                            </h3>
+                            <div id="techMainBlock" class="text-slate-700 dark:text-slate-300 leading-relaxed space-y-4">
+                                <!-- Loaded dynamically -->
+                            </div>
+                        </section>
+
+                        <section class="space-y-4">
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                                <i class="fa-solid fa-music text-fuchsia-600 dark:text-fuchsia-400 text-lg"></i> Era Synthesis Notes
+                            </h3>
+                            <div id="rapRomanceSection" class="text-slate-700 dark:text-slate-300 leading-relaxed space-y-4 italic bg-slate-100 dark:bg-slate-900/40 p-5 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <!-- Loaded dynamically -->
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Side Cards -->
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-4 shadow-sm dark:shadow-xl">
+                            <h4 class="text-xs font-semibold uppercase tracking-widest text-slate-500">Epoch Metadata</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs text-slate-400">Key Innovation</p>
+                                    <p id="keyInventionText" class="text-sm font-semibold text-indigo-600 dark:text-indigo-300">Default Tech</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-400">Primary Fuel/Energy Source</p>
+                                    <p id="fuelSourceText" class="text-sm font-semibold text-indigo-600 dark:text-indigo-300">Default Fuel</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-400">Aesthetic Palette</p>
+                                    <p id="aestheticPalette" class="text-sm font-semibold text-indigo-600 dark:text-indigo-300">Default Palette</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-gradient-to-br from-indigo-50/50 to-slate-50 dark:from-indigo-950/40 dark:to-slate-900/40 border border-indigo-200 dark:border-indigo-500/20 rounded-2xl space-y-4">
+                            <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                <i class="fa-solid fa-microchip"></i>
+                                <span class="text-xs font-mono font-bold uppercase tracking-widest">Invention Spotlight</span>
+                            </div>
+                            <h4 id="spotlightTitle" class="text-lg font-bold text-slate-800 dark:text-white">Spotlight Invention</h4>
+                            <p id="spotlightText" class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                Spotlight text detailed description.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- THE MUSIC ARCHIVE (JUKEBOX) -->
+                <section class="space-y-6 pt-8 border-t border-slate-200 dark:border-slate-800/80">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                            <i class="fa-solid fa-compact-disc text-indigo-600 dark:text-indigo-400 animate-spin" style="animation-duration: 4s;"></i> Famous Hit English Songs Playlist
+                        </h3>
+                        <span class="text-xs font-mono bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full">Interactive Audio</span>
+                    </div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                        Select an iconic English song from this era to play its procedurally synthesized melody using our built-in Web Audio engine. Read the historical and social relevance of each record.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="songCardsContainer">
+                        <!-- Loaded dynamically via JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Technological Catalog -->
+                <section class="space-y-6 pt-8 border-t border-slate-200 dark:border-slate-800/80">
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <i class="fa-solid fa-timeline text-indigo-600 dark:text-indigo-400 text-lg"></i> Era Innovation Chronology
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="timelineCardsContainer">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </section>
+
+                <footer class="text-center text-xs text-slate-400 pt-12 pb-6 border-t border-slate-200 dark:border-slate-800/60">
+                    Digital Time Machine Engine • Engineered by Panth Shah • Open-source Audio Sandbox
+                </footer>
+            </article>
+        </section>
+    </main>
+
+    <!-- CORE INTERACTIVE ENGINE -->
+    <script>
+        // --- IMMERSIVE COMPREHENSIVE DECADES DATABASE ---
+        const DECADE_DATABASE = [
+            {
+                year: "1910",
+                title: "1910s: The Great War & Early Brass",
+                musicLabel: "Traditional Ragtime & Acoustic Melodies",
+                tempo: 80,
+                baseFreq: 110, 
+                leadFreq: 220, 
+                themeClass: "font-t1910",
+                keyInvention: "The Standard Moving Assembly Line",
+                fuelSource: "Coal & Heavy Coal Gas",
+                palette: "Olive Drab, Weathered Brass, Antique Cream",
+                overview: `The 1910s were defined by massive industrial mobilization and the tectonic shocks of World War I. Society transitioned from equestrian transit to oil-refined combustion. As resource pools concentrated around major urban ports, popular music became the spiritual binder of troops traveling overseas.`,
+                techDetail: `Henry Ford standardized industrial mechanics in 1913, reducing vehicle assembly durations by over 80%. Meanwhile, Guglielmo Marconi's wireless transoceanic signals connected continents, setting the baseline for standard high-frequency public radio.`,
+                rapRomance: "A marching brass swing groove represents the heavy factories. Over this, a clean, sweet monophonic woodwind synth recreation plays a beautiful sequence.",
+                spotlightTitle: "The Vacuum-Tube Amplifier (1915)",
+                spotlightText: "Lee de Forest's Audion triode is refined for high-quality audio amplification, leading to early public address and telephone grids.",
+                bgColor: "#2d231e", 
+                particleColor: "#bfa38a",
+                songs: [
+                    {
+                        year: "1913",
+                        title: "Danny Boy",
+                        artist: "Traditional Celtic Standard",
+                        genre: "Traditional Folk Ballad",
+                        impact: "Widespread English-lyrics adaptation written by Frederic Weatherly. It became a comforting anthem of love and duty for parting families during World War I.",
+                        notes: [
+                            { note: "D4", dur: 0.3 }, { note: "F#4", dur: 0.15 }, { note: "G4", dur: 0.15 }, { note: "A4", dur: 0.3 },
+                            { note: "B4", dur: 0.15 }, { note: "A4", dur: 0.3 }, { note: "F#4", dur: 0.15 }, { note: "D4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1914",
+                        title: "St. Louis Blues",
+                        artist: "W.C. Handy",
+                        genre: "Traditional Folk Blues",
+                        impact: "Introduced early structured blue notes and the traditional call-and-response form to sheet music consumers, pioneering jazz integration.",
+                        notes: [
+                            { note: "G4", dur: 0.4 }, { note: "Bb4", dur: 0.4 }, { note: "C5", dur: 0.4 }, { note: "Db5", dur: 0.2 },
+                            { note: "C5", dur: 0.4 }, { note: "Bb4", dur: 0.6 }, { note: "G4", dur: 0.8 }
+                        ]
+                    },
+                    {
+                        year: "1915",
+                        title: "Pack Up Your Troubles",
+                        artist: "George Asaf",
+                        genre: "Wartime Marching Song",
+                        impact: "An incredibly popular music-hall marching tune that encouraged troops to maintain optimistic courage despite catastrophic circumstances.",
+                        notes: [
+                            { note: "G4", dur: 0.3 }, { note: "G4", dur: 0.15 }, { note: "A4", dur: 0.15 }, { note: "B4", dur: 0.3 },
+                            { note: "G4", dur: 0.3 }, { note: "C5", dur: 0.3 }, { note: "B4", dur: 0.3 }, { note: "A4", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1911", title: "Diesel Electric Railcar", desc: "Diesel engines debut on European train lines, paving paths toward long-haul efficiency." },
+                    { year: "1913", title: "Standardized Line Systems", desc: "Ford's continuous conveyor layout changes commercial scale factories." },
+                    { year: "1915", title: "Transcontinental Phone Line", desc: "Alexander Graham Bell completes the historic call from New York to San Francisco." }
+                ]
+            },
+            {
+                year: "1920",
+                title: "1920s: The Roaring Speakeasy Swing",
+                musicLabel: "Bouncy Charleston & Stride Piano",
+                tempo: 105,
+                baseFreq: 116,
+                leadFreq: 233,
+                themeClass: "font-t1920",
+                keyInvention: "Commercial Public Broadcast Radio",
+                fuelSource: "Early Grid Electrification",
+                palette: "Art Deco Gold, Polished Ebony, Ivory Slate",
+                overview: `Post-war euphoria birthed the roaring twenties. Speakeasies bypassed restrictive laws with modern jazz, as flapper cultures broke old behavioral boundaries. Cities climbed skyward with Art Deco motifs, and consumer credit triggered a dramatic boom in personal radios and phonographs.`,
+                techDetail: `Home radios became affordable, fueled by Edwin Armstrong's superheterodyne receiver circuit. Mechanical printing processes evolved, allowing millions of sheet music and shellac records to be bought monthly.`,
+                rapRomance: "Fast, energetic stride patterns play beneath a bright brass melody. It sings of midnight clubs and high-speed motorcars on coastal boulevards.",
+                spotlightTitle: "Electrical Recording (1925)",
+                spotlightText: "Western Electric replaces large acoustic megaphone horns with electromagnetic microphones, capturing a wider array of high-frequency instruments.",
+                bgColor: "#142c14",
+                particleColor: "#e5b842",
+                songs: [
+                    {
+                        year: "1920",
+                        title: "Swanee",
+                        artist: "Al Jolson",
+                        genre: "Traditional Vocal Pop",
+                        impact: "A massive early English pop blockbuster that stayed at Number One for nine consecutive weeks, selling over one million sheet music copies.",
+                        notes: [
+                            { note: "C5", dur: 0.3 }, { note: "E5", dur: 0.15 }, { note: "G5", dur: 0.15 }, { note: "C6", dur: 0.3 },
+                            { note: "G5", dur: 0.3 }, { note: "E5", dur: 0.3 }, { note: "C5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1923",
+                        title: "Charleston",
+                        artist: "James P. Johnson",
+                        genre: "Speakeasy Jazz",
+                        impact: "Defined the iconic energetic syncopation of the 1920s, inspiring dance-halls across Europe and North America to embrace jazz.",
+                        notes: [
+                            { note: "G4", dur: 0.2 }, { note: "Bb4", dur: 0.4 }, { note: "G4", dur: 0.2 }, { note: "C5", dur: 0.4 },
+                            { note: "Bb4", dur: 0.2 }, { note: "G4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1925",
+                        title: "Sweet Georgia Brown",
+                        artist: "Ben Bernie & Maceo Pinkard",
+                        genre: "Dixieland Jazz Pop",
+                        impact: "A major jazz standard of the era that eventually became the legendary theme song of the Harlem Globetrotters.",
+                        notes: [
+                            { note: "E5", dur: 0.3 }, { note: "D5", dur: 0.15 }, { note: "C5", dur: 0.15 }, { note: "A4", dur: 0.3 },
+                            { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.3 }, { note: "E5", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1920", title: "KDKA Broadcasts", desc: "The first commercial public radio system launches regular schedules in Pittsburgh." },
+                    { year: "1925", title: "Bell Telephone Labs", desc: "Standardized microelectronic research establishes a historic innovation center." },
+                    { year: "1927", title: "The Jazz Singer", desc: "The arrival of synchronous talkie audio marks the beginning of modern sound cinema." }
+                ]
+            },
+            {
+                year: "1930",
+                title: "1930s: Big Band & Decapole Swing",
+                musicLabel: "Elegant Orchestral Jazz & Blues",
+                tempo: 95,
+                baseFreq: 130, 
+                leadFreq: 261, 
+                themeClass: "font-t1930",
+                keyInvention: "The Theoretical Turing Machine",
+                fuelSource: "Hydroelectric Dam Networks",
+                palette: "Chrome Metal, Deep Emerald, Velvet Charcoal",
+                overview: `Despite the Great Depression, architectural ambition soared with major public works like the Hoover Dam. Design embraced Streamline Moderne, while big-band orchestra halls offered a colorful, hopeful escape from economic hardship.`,
+                techDetail: `Alan Turing detailed the theoretical mainframe for modern digital computers in 1936. Simultaneously, early magnetic tape recorders were introduced in Germany, replacing delicate wax cylinders.`,
+                rapRomance: "A warm, smooth brass-like tone drifts lazily over a steady swing bassline. Think of upscale, elegant ballrooms lit by giant crystal chandeliers.",
+                spotlightTitle: "The Radio Detection System (1935)",
+                spotlightText: "Sir Robert Watson-Watt invents functional RADAR, allowing pulsed electromagnetic radio waves to track distant structures.",
+                bgColor: "#0f172a", 
+                particleColor: "#38bdf8",
+                songs: [
+                    {
+                        year: "1931",
+                        title: "Minnie the Moocher",
+                        artist: "Cab Calloway",
+                        genre: "Big Band / Scat Jazz",
+                        impact: "The first jazz single to sell over a million copies, highlighting Cab's brilliant, call-and-response scat vocals.",
+                        notes: [
+                            { note: "E5", dur: 0.3 }, { note: "G5", dur: 0.3 }, { note: "A5", dur: 0.3 }, { note: "E5", dur: 0.3 },
+                            { note: "G5", dur: 0.15 }, { note: "A5", dur: 0.15 }, { note: "G5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1935",
+                        title: "Cheek to Cheek",
+                        artist: "Fred Astaire",
+                        genre: "Classic Vocal Jazz",
+                        impact: "Nominated for an Academy Award, this beautifully elegant romantic song became a signature pop hit of Fred Astaire's film career.",
+                        notes: [
+                            { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.15 }, { note: "E5", dur: 0.15 }, { note: "G5", dur: 0.3 },
+                            { note: "F5", dur: 0.3 }, { note: "E5", dur: 0.3 }, { note: "D5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1939",
+                        title: "Over the Rainbow",
+                        artist: "Judy Garland",
+                        genre: "Traditional Vocal Pop",
+                        impact: "The definitive pop ballad of hope and escapism of the late 1930s, immortalized in the soundtrack of The Wizard of Oz.",
+                        notes: [
+                            { note: "C4", dur: 0.4 }, { note: "C5", dur: 0.4 }, { note: "B4", dur: 0.2 }, { note: "G4", dur: 0.2 },
+                            { note: "A4", dur: 0.2 }, { note: "B4", dur: 0.2 }, { note: "C5", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1930", title: "Analog Computer", desc: "Vannevar Bush builds the Differential Analyzer to solve complex equations." },
+                    { year: "1936", title: "Turing Blueprint", desc: "Mathematical outlines define universal software programs and computation." },
+                    { year: "1938", title: "Magnetic Audio Tape", desc: "Fritz Pfleumer refines plastic tape coated with oxide for sound recording." }
+                ]
+            },
+            {
+                year: "1940",
+                title: "1940s: Computational Cryptography",
+                musicLabel: "Bebop Swing & Sentimental Ballads",
+                tempo: 90,
+                baseFreq: 146,
+                leadFreq: 293,
+                themeClass: "font-t1930",
+                keyInvention: "The Vacuum-Tube Digital Computer",
+                fuelSource: "Wartime Fission Reactors",
+                palette: "Antique Parchment, Gunmetal Blue, Copper Filigree",
+                overview: `Wartime operations forced an unprecedented push for high-speed cryptography. Delicate mechanical components were replaced by fast electronic vacuum tubes, laying the hardware foundation for the digital computing age.`,
+                techDetail: `Secret mathematical engineers at Bletchley Park designed Colossus in 1943 to crack Lorenz ciphers. In 1945, ENIAC processed physical ballistic equations using over 17,000 vacuum tubes.`,
+                rapRomance: "A militaristic snapping groove. A nostalgic, warm clarinet synth tone sings a soothing melody, providing comfort amidst the anxiety of the war years.",
+                spotlightTitle: "The Point-Contact Transistor (1947)",
+                spotlightText: "John Bardeen, Walter Brattain, and William Shockley construct the solid-state transistor, making delicate vacuum tubes obsolete.",
+                bgColor: "#1e1e38",
+                particleColor: "#f43f5e",
+                songs: [
+                    {
+                        year: "1942",
+                        title: "White Christmas",
+                        artist: "Bing Crosby",
+                        genre: "Traditional Vocal Pop",
+                        impact: "Remains the best-selling physical single of all time worldwide, representing home and nostalgia for military personnel overseas.",
+                        notes: [
+                            { note: "E4", dur: 0.3 }, { note: "F4", dur: 0.15 }, { note: "E4", dur: 0.3 }, { note: "D#4", dur: 0.15 },
+                            { note: "E4", dur: 0.3 }, { note: "F4", dur: 0.3 }, { note: "G4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1944",
+                        title: "Sentimental Journey",
+                        artist: "Les Brown & Doris Day",
+                        genre: "Big Band / Swing",
+                        impact: "An instant smash hit that was released to coincide with the end of the European war, serving as the official homecoming theme song.",
+                        notes: [
+                            { note: "G4", dur: 0.3 }, { note: "A4", dur: 0.15 }, { note: "B4", dur: 0.15 }, { note: "C5", dur: 0.3 },
+                            { note: "D5", dur: 0.3 }, { note: "B4", dur: 0.3 }, { note: "G4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1945",
+                        title: "Caldonia",
+                        artist: "Louis Jordan & His Tympany Five",
+                        genre: "Jump Blues",
+                        impact: "Preceded Rock and Roll with high-speed horn hooks, bouncy walking basslines, and humorous, fast-paced vocals.",
+                        notes: [
+                            { note: "C5", dur: 0.2 }, { note: "C5", dur: 0.2 }, { note: "A4", dur: 0.2 }, { note: "G4", dur: 0.4 },
+                            { note: "C5", dur: 0.2 }, { note: "A4", dur: 0.2 }, { note: "C5", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1943", title: "Colossus Cracked", desc: "The world's first programmable digital electronic computer starts cryptography operations." },
+                    { year: "1945", title: "ENIAC Activation", desc: "General-purpose digital computation runs mathematical equations in Philadelphia." },
+                    { year: "1947", title: "Solid-State Transition", desc: "Bell Labs constructs functional semiconductors, shrinking mechanical sizes." }
+                ]
+            },
+            {
+                year: "1950",
+                title: "1950s: The Atomic & Silicon Dawn",
+                musicLabel: "Early Rock & Roll Anthems",
+                tempo: 110,
+                baseFreq: 164, 
+                leadFreq: 329, 
+                themeClass: "font-t1950",
+                keyInvention: "The Integrated Silicon Circuit",
+                fuelSource: "Atomic Nuclear Power Stations",
+                palette: "Mint Turquoise, Retro Pink, Polished Vinyl",
+                overview: `Postwar optimism birthed retro-futurist sub-divisions and space-age designs. As families gathered around standard black-and-white television sets, youth cultures embraced high-energy Rock and Roll, driven by the electric guitar.`,
+                techDetail: `Sputnik 1 shocked the world in 1957, launching the Space Race and forcing massive government backing of microelectronics, global telecommunication satellites, and advanced guidance systems.`,
+                rapRomance: "A high-octane 110 BPM rockbeat. Fuzzed square waves simulate the crunchy tube amplifiers that defined early rock guitar riffs.",
+                spotlightTitle: "The Integrated Circuit (1958)",
+                spotlightText: "Jack Kilby and Robert Noyce independently conceptualize placing multiple microelectronic components onto a single silicon wafer.",
+                bgColor: "#0c3a2e", 
+                particleColor: "#5fe3a1",
+                songs: [
+                    {
+                        year: "1954",
+                        title: "Rock Around the Clock",
+                        artist: "Bill Haley & His Comets",
+                        genre: "Rock & Roll",
+                        impact: "Launched Rock and Roll into mainstream youth culture worldwide, establishing the electric guitar as the dominant pop instrument.",
+                        notes: [
+                            { note: "C5", dur: 0.3 }, { note: "E5", dur: 0.3 }, { note: "G5", dur: 0.3 }, { note: "E5", dur: 0.3 },
+                            { note: "A5", dur: 0.6 }, { note: "G5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1956",
+                        title: "Heartbreak Hotel",
+                        artist: "Elvis Presley",
+                        genre: "Rockabilly",
+                        impact: "Elvis's first million-seller single, combining rhythm and blues with country scales to define the sound of the 1950s.",
+                        notes: [
+                            { note: "A4", dur: 0.4 }, { note: "C5", dur: 0.2 }, { note: "E5", dur: 0.4 }, { note: "C5", dur: 0.2 },
+                            { note: "A4", dur: 0.8 }
+                        ]
+                    },
+                    {
+                        year: "1958",
+                        title: "Johnny B. Goode",
+                        artist: "Chuck Berry",
+                        genre: "Rock & Roll",
+                        impact: "Introduced the iconic double-stop guitar intro that became a foundational textbook lesson for generations of rock musicians.",
+                        notes: [
+                            { note: "Bb4", dur: 0.2 }, { note: "D5", dur: 0.2 }, { note: "F5", dur: 0.2 }, { note: "D5", dur: 0.2 },
+                            { note: "G5", dur: 0.4 }, { note: "F5", dur: 0.4 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1951", title: "UNIVAC I Delivery", desc: "The Census Bureau deploys the first commercial digital computer to process mass records." },
+                    { year: "1954", title: "Silicon Semiconductors", desc: "Texas Instruments develops a commercial manufacturing process for silicon transistors." },
+                    { year: "1957", title: "Sputnik 1 Orbit", desc: "The USSR orbits the first artificial satellite, transmitting radio signals worldwide." }
+                ]
+            },
+            {
+                year: "1960",
+                title: "1960s: Counter-Culture & Mainframes",
+                musicLabel: "Psychedelic Rock & Blues Harmonies",
+                tempo: 95,
+                baseFreq: 110,
+                leadFreq: 220,
+                themeClass: "font-t1960",
+                keyInvention: "The Apollo Guidance System",
+                fuelSource: "Super-Refined Petroleum Grids",
+                palette: "Psychedelic Amber, Faded Teal, Acid Violet",
+                overview: `An era of intense social protest, civil rights struggles, and cold war crises. Counter-cultures challenged traditional hierarchies, as the Space Race culminated in humanity's historic landing on the moon.`,
+                techDetail: `NASA's Apollo Guidance Computer utilized high-density silicon integrated chips. Concurrently, Douglas Engelbart demonstrated the first computer mouse, hyperlinks, and interactive windows in 1968.`,
+                rapRomance: "A driving, fuzzy rock track. Staccato synth lines capture the iconic guitar riffs and psychedelic organ loops of the Woodstock generation.",
+                spotlightTitle: "The ARPANET Concept (1969)",
+                spotlightText: "The US Department of Defense links hosts at UCLA and Stanford, completing the first decentralized packet-switching data network.",
+                bgColor: "#291b38",
+                particleColor: "#f59e0b",
+                songs: [
+                    {
+                        year: "1964",
+                        title: "A Hard Day's Night",
+                        artist: "The Beatles",
+                        genre: "British Invasion Pop",
+                        impact: "Kicked off British Invasion mania with its legendary opening chord, combining clean vocal harmonies with jangling 12-string guitars.",
+                        notes: [
+                            { note: "G4", dur: 0.3 }, { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.3 }, { note: "E5", dur: 0.3 },
+                            { note: "G5", dur: 0.6 }, { note: "F5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1965",
+                        title: "Satisfaction",
+                        artist: "The Rolling Stones",
+                        genre: "Classic Rock",
+                        impact: "Defined by Keith Richards' driving, distorted guitar riff, this became a generation-defining anthem of social protest and youthful defiance.",
+                        notes: [
+                            { note: "B4", dur: 0.3 }, { note: "B4", dur: 0.3 }, { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.6 },
+                            { note: "D5", dur: 0.3 }, { note: "C5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1969",
+                        title: "Space Oddity",
+                        artist: "David Bowie",
+                        genre: "Psychedelic Art Rock",
+                        impact: "Released to coincide with the Apollo 11 mission, this beautiful acoustic track used space travel as a metaphor for isolation.",
+                        notes: [
+                            { note: "C5", dur: 0.4 }, { note: "E5", dur: 0.4 }, { note: "A5", dur: 0.4 }, { note: "G5", dur: 0.8 },
+                            { note: "F5", dur: 0.4 }, { note: "E5", dur: 0.8 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1964", title: "IBM System/360", desc: "Introduces standardized, upgradeable mainframe hardware architectures to global business markets." },
+                    { year: "1968", title: "Mother of All Demos", desc: "Douglas Engelbart showcases interactive mouse pointers, windows, and early hyperlinks." },
+                    { year: "1969", title: "Moon Landing", desc: "Apollo 11 lands safely on the lunar surface, powered by custom integrated circuits." }
+                ]
+            },
+            {
+                year: "1970",
+                title: "1970s: Microprocessors & Funk",
+                musicLabel: "Funky Disco & Piano Rock",
+                tempo: 100,
+                baseFreq: 220, 
+                leadFreq: 440, 
+                themeClass: "font-t1970",
+                keyInvention: "The Single-Chip Microprocessor",
+                fuelSource: "Heavy Fossil Fuels & Early Nuclear Power",
+                palette: "Mustard Gold, Earthy Sienna, Neon Orange",
+                overview: `Democratized technology, early personal electronics, and vibrant self-expression. Handheld calculators and classic arcade games brought computing out of academic laboratories and directly into everyday lives.`,
+                techDetail: `Intel commercialized the 4004 microprocessor in 1971, compressing an entire central processing unit (CPU) onto a single silicon chip. In 1973, Xerox PARC created the Alto, demonstrating the first modern graphical user interface (GUI).`,
+                rapRomance: "A groovy, funky bassline. Elegant synthesized piano chords represent the legendary multi-track recordings of the classic vinyl era.",
+                spotlightTitle: "The Ethernet Specification (1973)",
+                spotlightText: "Robert Metcalfe designs localized coaxial networking, enabling multiple computer terminals to share files and printer grids.",
+                bgColor: "#3d1303", 
+                particleColor: "#fcd34d",
+                songs: [
+                    {
+                        year: "1971",
+                        title: "Imagine",
+                        artist: "John Lennon",
+                        genre: "Classic Piano Pop",
+                        impact: "A beautifully simple, universally recognized piano anthem of peace that captured the social aspirations of the counter-culture.",
+                        notes: [
+                            { note: "G4", dur: 0.3 }, { note: "B4", dur: 0.3 }, { note: "C5", dur: 0.3 }, { note: "B4", dur: 0.3 },
+                            { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1975",
+                        title: "Bohemian Rhapsody",
+                        artist: "Queen",
+                        genre: "Progressive Rock",
+                        impact: "An operatic masterpiece that shattered standard pop radio limits, showcasing multi-track vocal layering and dramatic stylistic shifts.",
+                        notes: [
+                            { note: "C5", dur: 0.4 }, { note: "D5", dur: 0.2 }, { note: "Eb5", dur: 0.4 }, { note: "C5", dur: 0.2 },
+                            { note: "Bb4", dur: 0.8 }
+                        ]
+                    },
+                    {
+                        year: "1977",
+                        title: "Stayin' Alive",
+                        artist: "Bee Gees",
+                        genre: "Disco",
+                        impact: "Defined the late-1970s disco boom, using an infectious, steady dance-hall beat and high-pitched vocal harmonies to dominate charts worldwide.",
+                        notes: [
+                            { note: "F5", dur: 0.2 }, { note: "F5", dur: 0.2 }, { note: "Eb5", dur: 0.2 }, { note: "F5", dur: 0.4 },
+                            { note: "Eb5", dur: 0.2 }, { note: "C5", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1971", title: "Intel 4004 CPU", desc: "The first commercial single-chip CPU is released, launching the microcomputer revolution." },
+                    { year: "1973", title: "TCP/IP Protocol Draft", desc: "Vint Cerf and Bob Kahn design the core packet-routing standards of the Internet." },
+                    { year: "1977", title: "Trinity Consumer Desktops", desc: "The Apple II, TRS-80, and Commodore PET bring personal computers into homes." }
+                ]
+            },
+            {
+                year: "1980",
+                title: "1980s: Synthpop & Cyberpunk",
+                musicLabel: "Futuristic Synthwave & FM Digital Hits",
+                tempo: 112,
+                baseFreq: 196, 
+                leadFreq: 392, 
+                themeClass: "font-t1980",
+                keyInvention: "The Standard x86 PC Architecture",
+                fuelSource: "Heavy Coal & Integrated Grids",
+                palette: "Electric Cyan, Laser Magenta, Obsidian Dark",
+                overview: `Personal computing, home arcade video games, and synthesized pop music exploded into global culture, replacing traditional analog textures with clean, digital FM sounds.`,
+                techDetail: `IBM introduced the 5150 PC in 1981, standardizing x86 hardware. In 1985, Nintendo launched the NES, bringing advanced pixel graphics, scrolling stages, and synthesized chiptunes into millions of living rooms.`,
+                rapRomance: "A high-tempo 112 BPM synth beat. Sharp FM digital chords deliver steady rhythms, while a bright, neon-style lead synth plays expressive, gliding notes.",
+                spotlightTitle: "The MIDI Specification (1983)",
+                spotlightText: "Musical Instrument Digital Interface is standardized, allowing synthesizers, samplers, and computers to connect and sync.",
+                bgColor: "#3b0764", 
+                particleColor: "#f472b6",
+                songs: [
+                    {
+                        year: "1982",
+                        title: "Billie Jean",
+                        artist: "Michael Jackson",
+                        genre: "Pop / Synth-Funk",
+                        impact: "Redefined pop production with its tight, bass-driven groove, synthesizer stabs, and historic music video broadcast on MTV.",
+                        notes: [
+                            { note: "F#4", dur: 0.3 }, { note: "C#4", dur: 0.3 }, { note: "E4", dur: 0.3 }, { note: "F#4", dur: 0.3 },
+                            { note: "E4", dur: 0.3 }, { note: "C#4", dur: 0.3 }, { note: "B3", dur: 0.3 }
+                        ]
+                    },
+                    {
+                        year: "1983",
+                        title: "Sweet Dreams",
+                        artist: "Eurythmics",
+                        genre: "Synthpop",
+                        impact: "Showcased dark, rhythmic synthesizer riffs combined with powerful, modern vocals, defining the early-80s new wave sound.",
+                        notes: [
+                            { note: "C5", dur: 0.3 }, { note: "Eb5", dur: 0.15 }, { note: "C5", dur: 0.3 }, { note: "Ab5", dur: 0.3 },
+                            { note: "G5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1987",
+                        title: "Never Gonna Give You Up",
+                        artist: "Rick Astley",
+                        genre: "Dance-Pop",
+                        impact: "A massive worldwide dance-pop hit that later evolved into the internet's most iconic hyperlink-prank meme: the Rickroll.",
+                        notes: [
+                            { note: "F4", dur: 0.2 }, { note: "G4", dur: 0.2 }, { note: "Bb4", dur: 0.2 }, { note: "G4", dur: 0.2 },
+                            { note: "D5", dur: 0.4 }, { note: "D5", dur: 0.4 }, { note: "C5", dur: 0.8 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1981", title: "IBM 5150 PC", desc: "First standardized home business desktop establishes mass x86 processing standard." },
+                    { year: "1983", title: "ARPANET transitions to TCP/IP", desc: "The official protocol transition establishes the core architecture of the global Internet." },
+                    { year: "1985", title: "Nintendo NES", desc: "Advanced 8-bit home entertainment systems popularize dynamic sound and gaming." }
+                ]
+            },
+            {
+                year: "1990",
+                title: "1990s: The Information Superhighway",
+                musicLabel: "Grunge, Alternative Rock & Britpop",
+                tempo: 96,
+                baseFreq: 146,
+                leadFreq: 293,
+                themeClass: "font-t1990",
+                keyInvention: "The World Wide Web (WWW)",
+                fuelSource: "Global Electrification Expansion",
+                palette: "Deep Teal, Brushed Aluminum, Pixel Violet",
+                overview: `The internet moved from standard text terminals to the World Wide Web, transforming personal computers from simple file processors into nodes of an interconnected global information network.`,
+                techDetail: `Tim Berners-Lee wrote the HTML and HTTP protocols at CERN in 1990, inventing the web. By 1995, Windows 95 integrated a built-in dial-up TCP/IP stack, bringing mass internet access to households worldwide.`,
+                rapRomance: "A heavy, snapping 96 BPM drum groove. Raw, distorted guitar-style synths recreate the crunchy, rebellious alternative sound that dominated MTV.",
+                spotlightTitle: "Netscape Navigator (1994)",
+                spotlightText: "The first commercial graphical browser is released, transforming the web from static text lines into a visual, interactive experience.",
+                bgColor: "#042f2e",
+                particleColor: "#2dd4bf",
+                songs: [
+                    {
+                        year: "1991",
+                        title: "Smells Like Teen Spirit",
+                        artist: "Nirvana",
+                        genre: "Grunge Rock",
+                        impact: "Catapulted alternative grunge rock into mainstream culture, using soft-loud dynamics to define the sound of Gen X defiance.",
+                        notes: [
+                            { note: "F4", dur: 0.3 }, { note: "F4", dur: 0.15 }, { note: "Bb4", dur: 0.3 }, { note: "Ab4", dur: 0.3 },
+                            { note: "Db5", dur: 0.3 }, { note: "C5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1992",
+                        title: "Creep",
+                        artist: "Radiohead",
+                        genre: "Alternative Rock",
+                        impact: "An international alternative rock hit defined by its quiet verses and sudden, abrasive guitar bursts in the chorus.",
+                        notes: [
+                            { note: "G4", dur: 0.3 }, { note: "B4", dur: 0.3 }, { note: "C5", dur: 0.3 }, { note: "Cm5", dur: 0.6 },
+                            { note: "B4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "1997",
+                        title: "Bitter Sweet Symphony",
+                        artist: "The Verve",
+                        genre: "Britpop",
+                        impact: "A beautifully layered Britpop anthem that blended orchestral string loops with modern rock beats, capturing the reflective mood of the late 90s.",
+                        notes: [
+                            { note: "E5", dur: 0.3 }, { note: "E5", dur: 0.15 }, { note: "D5", dur: 0.3 }, { note: "C#5", dur: 0.3 },
+                            { note: "B4", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "1991", title: "World Wide Web Public", desc: "CERN releases tim Berners-Lee's hypermedia code, starting public web history." },
+                    { year: "1995", title: "Windows 95 Debut", desc: "Integrates graphic interface layouts, taskbars, and default dial-up tools." },
+                    { year: "1998", title: "Google Search Engine", desc: "Larry Page and Sergey Brin launch PageRank, index-organizing global pages." }
+                ]
+            },
+            {
+                year: "2000",
+                title: "2000s: The Mobile Web & Nu-Metal",
+                musicLabel: "Alt-Rock & Electronic Pop Ballads",
+                tempo: 120,
+                baseFreq: 110,
+                leadFreq: 220,
+                themeClass: "font-t2000",
+                keyInvention: "The Modern Capacitive Smartphone",
+                fuelSource: "Lithium-Ion Battery Systems",
+                palette: "Glossy White, Platinum, Aqua Blue",
+                overview: `The internet moved from heavy desktop setups into pockets. The rise of early social media, streaming sites, and personal smartphones allowed users to connect with the web in real-time, laying the groundwork for today's app-based digital economy.`,
+                techDetail: `Apple launched the iPhone in 2007, combining a multi-touch screen, web browser, and custom mobile operating system into a single device. The subsequent release of the App Store sparked a massive boom in mobile software engineering, changing how we interact with technology daily.`,
+                rapRomance: "A fast, energetic 120 BPM club beat with synthesized basslines. Bright, digitized chord progressions capture the excitement of early digital communities.",
+                spotlightTitle: "YouTube Video Sharing (2005)",
+                spotlightText: "The video-sharing platform is founded, enabling user-generated video content to be uploaded, shared, and streamed globally.",
+                bgColor: "#082f49",
+                particleColor: "#38bdf8",
+                songs: [
+                    {
+                        year: "2001",
+                        title: "In the End",
+                        artist: "Linkin Park",
+                        genre: "Nu-Metal / Rap Rock",
+                        impact: "Combined heavy guitar riffs and rapping with a melodic piano-driven chorus, defining the alternative rock sound of the early 2000s.",
+                        notes: [
+                            { note: "D#5", dur: 0.3 }, { note: "D#5", dur: 0.3 }, { note: "A#4", dur: 0.3 }, { note: "A#4", dur: 0.3 },
+                            { note: "B4", dur: 0.3 }, { note: "A#4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "2003",
+                        title: "Hey Ya!",
+                        artist: "Outkast",
+                        genre: "Indie Pop / Funk",
+                        impact: "An infectious, genre-bending pop-funk classic that encouraged listeners to 'shake it like a Polaroid picture' while delivering melancholic lyrics on relationships.",
+                        notes: [
+                            { note: "G4", dur: 0.3 }, { note: "G4", dur: 0.3 }, { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.3 },
+                            { note: "E5", dur: 0.6 }, { note: "D5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "2007",
+                        title: "Umbrella",
+                        artist: "Rihanna ft. Jay-Z",
+                        genre: "Pop R&B",
+                        impact: "Unified a booming synth-bass hook with soulful vocals and a memorable chorus, solidifying Rihanna's place as a global pop superstar.",
+                        notes: [
+                            { note: "F5", dur: 0.3 }, { note: "F5", dur: 0.3 }, { note: "Eb5", dur: 0.3 }, { note: "Db5", dur: 0.3 },
+                            { note: "Bb4", dur: 0.6 }, { note: "Db5", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "2001", title: "Apple iPod Launch", desc: "Compresses 1,000 digital MP3 audio tracks onto a tiny pocket hard drive." },
+                    { year: "2004", title: "Facebook Launches", desc: "The global social network launches in college dorms, changing public networks." },
+                    { year: "2007", title: "iPhone Unveiling", desc: "Steve Jobs showcases multi-touch interfaces, removing physical mobile keys." }
+                ]
+            },
+            {
+                year: "2010",
+                title: "2010s: Cloud Systems & Big Data",
+                musicLabel: "Soulful Pop & Electronic Beats",
+                tempo: 125,
+                baseFreq: 116,
+                leadFreq: 233,
+                themeClass: "font-t2000",
+                keyInvention: "Decentralized Public Blockchains",
+                fuelSource: "Hyperscale Cloud Server Datacenters",
+                palette: "Slate Blue, Carbon Fiber, Emerald Spark",
+                overview: `The 2010s were defined by the centralization of the web into massive cloud platforms and the explosion of big data. Streaming services, on-demand apps, and gig economies became part of daily life, powered by distributed servers and complex algorithms that processed user data in real-time.`,
+                techDetail: `AWS, Microsoft Azure, and Google Cloud became the backbone of modern software architecture, allowing apps to scale instantly to millions of users worldwide.`,
+                rapRomance: "A clean, modern pop-soul rhythm. Warm vocal-like synth textures trade off with solid electronic basslines, simulating early-2010s chart-topping anthems.",
+                spotlightTitle: "AlexNet GPU Breakthrough (2012)",
+                spotlightText: "Deep neural networks trained on graphic processing units (GPUs) achieve unprecedented image recognition accuracy, starting the modern AI boom.",
+                bgColor: "#0f172a",
+                particleColor: "#10b981",
+                songs: [
+                    {
+                        year: "2011",
+                        title: "Rolling in the Deep",
+                        artist: "Adele",
+                        genre: "Soulful Pop",
+                        impact: "A massive, powerful soul-pop anthem that dominated charts worldwide, showcasing Adele's incredible vocal range and retro production.",
+                        notes: [
+                            { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.3 }, { note: "Eb5", dur: 0.3 }, { note: "D5", dur: 0.3 },
+                            { note: "C5", dur: 0.6 }, { note: "Bb4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "2015",
+                        title: "Uptown Funk",
+                        artist: "Mark Ronson ft. Bruno Mars",
+                        genre: "Funk-Pop",
+                        impact: "A massive pop-funk anthem that combined modern production with retro 80s horn lines, dominating charts for weeks.",
+                        notes: [
+                            { note: "D5", dur: 0.3 }, { note: "D5", dur: 0.3 }, { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.3 },
+                            { note: "F5", dur: 0.6 }, { note: "D5", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "2017",
+                        title: "Shape of You",
+                        artist: "Ed Sheeran",
+                        genre: "Dance-Pop",
+                        impact: "Built on a plucky marimba-like synth loop, this became one of the most streamed songs in global history, dominating charts on every continent.",
+                        notes: [
+                            { note: "C#5", dur: 0.2 }, { note: "E5", dur: 0.2 }, { note: "C#5", dur: 0.2 }, { note: "C#5", dur: 0.2 },
+                            { note: "D#5", dur: 0.4 }, { note: "B4", dur: 0.4 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "2010", title: "Instagram Released", desc: "Standard visual social network launches on iOS, creating photographic influencers." },
+                    { year: "2012", title: "ImageNet Milestone", desc: "Neural networks trained on GPUs prove deep learning is viable." },
+                    { year: "2015", title: "Ethereum Network", desc: "Launches programmable smart contracts, creating decentralized computing networks." }
+                ]
+            },
+            {
+                year: "2019",
+                title: "2019: The Pre-Pandemic Synthwave",
+                musicLabel: "Electropop & Retro Synth Revival",
+                tempo: 120,
+                baseFreq: 120,
+                leadFreq: 240,
+                themeClass: "font-t2020",
+                keyInvention: "Mass Commercial 5G Infrastructure",
+                fuelSource: "Lithium Grid Accumulators",
+                palette: "Laser Purple, Neon Pink, Jet Black",
+                overview: `A pivotal year that merged dark, minimalist electropop with massive nostalgia-laden synthwave revivals, setting the stage for a new decade of digital audio expression.`,
+                techDetail: `NVIDIA and AMD pushed processing boundaries, enabling real-time ray tracing and complex neural network training on consumer devices.`,
+                rapRomance: "Glitchy, pulsing bass synths. A high-contrast electronic melody line mimics the dark, stylized production that dominated early streaming charts.",
+                spotlightTitle: "Large Language Models Bloom (2019)",
+                spotlightText: "Transformer architectures scale to billions of parameters, demonstrating early coherence in text generation.",
+                bgColor: "#1c1917",
+                particleColor: "#e11d48",
+                songs: [
+                    {
+                        year: "2019",
+                        title: "Bad Guy",
+                        artist: "Billie Eilish",
+                        genre: "Minimalist Electropop",
+                        impact: "Won Record and Song of the Year at the Grammys, featuring a dark, tongue-in-cheek delivery and minimalist electronic production.",
+                        notes: [
+                            { note: "G4", dur: 0.2 }, { note: "G4", dur: 0.2 }, { note: "Bb4", dur: 0.2 }, { note: "G4", dur: 0.2 },
+                            { note: "C5", dur: 0.4 }, { note: "G4", dur: 0.4 }
+                        ]
+                    },
+                    {
+                        year: "2019",
+                        title: "Blinding Lights",
+                        artist: "The Weeknd",
+                        genre: "80s Synthwave Revival",
+                        impact: "A massive worldwide hit that brought retro 80s synth sounds back to the top of modern charts, becoming the longest-charting song of all time.",
+                        notes: [
+                            { note: "F4", dur: 0.3 }, { note: "F4", dur: 0.3 }, { note: "Ab4", dur: 0.3 }, { note: "Eb4", dur: 0.3 },
+                            { note: "Bb4", dur: 0.6 }, { note: "Ab4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "2019",
+                        title: "Old Town Road",
+                        artist: "Lil Nas X",
+                        genre: "Country Rap",
+                        impact: "Combined acoustic banjo samples with deep trap beats to spend a record-breaking 19 weeks at Number One on the Hot 100.",
+                        notes: [
+                            { note: "C#4", dur: 0.3 }, { note: "E4", dur: 0.3 }, { note: "F#4", dur: 0.3 }, { note: "E4", dur: 0.3 },
+                            { note: "C#4", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "2019", title: "5G Cellular Deployments", desc: "Commercial gigabit cellular data networks begin public rollouts." },
+                    { year: "2019", title: "Transformer AI Milestones", desc: "GPT-2 demonstrates the power of scaling transformer-based models." },
+                    { year: "2019", title: "Virtual Concert Era", desc: "Marshmello performs inside Fortnite to over 10 million players, changing virtual entertainment." }
+                ]
+            },
+            {
+                year: "2021",
+                title: "2021: The Pandemic Digital Shift",
+                musicLabel: "Disco-Pop & Emotional Anthems",
+                tempo: 118,
+                baseFreq: 130,
+                leadFreq: 260,
+                themeClass: "font-t2020",
+                keyInvention: "Distributed Work & Cloud Platforms",
+                fuelSource: "Hyperscale Clean Energy Solar Grids",
+                palette: "Translucent Acrylic, Silver, Sky Blue",
+                overview: `Global lockdowns accelerated the shift to remote work, virtual classrooms, and digital entertainment. Pop music adapted with energetic, upbeat disco revival tracks designed to keep spirits high at home.`,
+                techDetail: `Video collaboration tools, cloud infrastructures, and digital entertainment platforms scaled instantly to support billions of users worldwide.`,
+                rapRomance: "An upbeat, driving disco-pop rhythm. A bright, retro synth lead mimics the energetic, nostalgic production that dominated global playlists.",
+                spotlightTitle: "Remote Work Boom (2021)",
+                spotlightText: "Cloud platforms enable safe, real-time collaboration across distributed teams around the globe.",
+                bgColor: "#0f172a",
+                particleColor: "#60a5fa",
+                songs: [
+                    {
+                        year: "2021",
+                        title: "Stay",
+                        artist: "The Kid LAROI & Justin Bieber",
+                        genre: "Synth-Pop",
+                        impact: "A fast-paced, synth-driven pop hit that blended emotional vocal hooks with an energetic, modern synthwave beat.",
+                        notes: [
+                            { note: "F#4", dur: 0.3 }, { note: "A#4", dur: 0.3 }, { note: "C#5", dur: 0.3 }, { note: "B4", dur: 0.6 },
+                            { note: "A#4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "2021",
+                        title: "Levitating",
+                        artist: "Dua Lipa",
+                        genre: "Disco-Pop",
+                        impact: "Combined classic disco grooves with modern pop hooks, spending a record-breaking 77 weeks on the Billboard Hot 100.",
+                        notes: [
+                            { note: "B4", dur: 0.2 }, { note: "B4", dur: 0.2 }, { note: "D5", dur: 0.2 }, { note: "B4", dur: 0.2 },
+                            { note: "F#4", dur: 0.4 }, { note: "A4", dur: 0.4 }
+                        ]
+                    },
+                    {
+                        year: "2021",
+                        title: "Easy on Me",
+                        artist: "Adele",
+                        genre: "Piano Pop Ballad",
+                        impact: "Adele's record-breaking comeback ballad, featuring a simple, powerful piano performance and emotional vocals.",
+                        notes: [
+                            { note: "F4", dur: 0.3 }, { note: "A4", dur: 0.3 }, { note: "Bb4", dur: 0.3 }, { note: "A4", dur: 0.3 },
+                            { note: "F4", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "2021", title: "Remote Collaboration Boom", desc: "Collaborative platforms scale instantly to support remote work worldwide." },
+                    { year: "2021", title: "WebAssembly Progress", desc: "Enables desktop-grade applications to run natively inside web browsers." },
+                    { year: "2021", title: "Commercial Space Flights", desc: "Private companies successfully launch civilian crews into orbit." }
+                ]
+            },
+            {
+                year: "2024",
+                title: "2024: Nu-Disco & Indie Rock",
+                musicLabel: "Nu-Disco Pop & Indie Rock Chords",
+                tempo: 115,
+                baseFreq: 135,
+                leadFreq: 270,
+                themeClass: "font-t2030",
+                keyInvention: "Generative AI Systems",
+                fuelSource: "Hyperscale Energy Infrastructures",
+                palette: "Sleek Charcoal, Pearl White, Electric Pink",
+                overview: `A vibrant year of musical expression, highlighting a revival of nu-disco grooves, soulful indie rock, and clever pop lyricism that captured the public's imagination.`,
+                techDetail: `Multi-modal AI models seamlessly integrate text, voice, and visual inputs, transforming creative workflows and everyday computing.`,
+                rapRomance: "A sleek, driving 115 BPM nu-disco groove. Plucky, bright synthesizer melodies deliver a fresh, infectious pop vibe.",
+                spotlightTitle: "ChatGPT goes Multi-Modal (2024)",
+                spotlightText: "AI models interact seamlessly using voice, text, and real-time vision capabilities.",
+                bgColor: "#111827",
+                particleColor: "#ec4899",
+                songs: [
+                    {
+                        year: "2024",
+                        title: "Espresso",
+                        artist: "Sabrina Carpenter",
+                        genre: "Nu-Disco Pop",
+                        impact: "An incredibly infectious summer hit featuring clever lyrics, a driving nu-disco groove, and a nostalgic pop arrangement.",
+                        notes: [
+                            { note: "A4", dur: 0.2 }, { note: "C5", dur: 0.2 }, { note: "D5", dur: 0.2 }, { note: "C5", dur: 0.2 },
+                            { note: "A4", dur: 0.4 }, { note: "G4", dur: 0.4 }
+                        ]
+                    },
+                    {
+                        year: "2024",
+                        title: "Too Sweet",
+                        artist: "Hozier",
+                        genre: "Soulful Indie Rock",
+                        impact: "Hozier's chart-topping blues-rock hit, built around a deep, memorable bassline and soulful, expressive vocals.",
+                        notes: [
+                            { note: "E4", dur: 0.3 }, { note: "G4", dur: 0.3 }, { note: "A4", dur: 0.3 }, { note: "G4", dur: 0.3 },
+                            { note: "E4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "2024",
+                        title: "Not Like Us",
+                        artist: "Kendrick Lamar",
+                        genre: "West Coast Hip-Hop",
+                        impact: "A massive, hard-hitting West Coast hip-hop anthem that demonstrated the power of traditional diss tracks in the modern streaming era.",
+                        notes: [
+                            { note: "C#5", dur: 0.3 }, { note: "C#5", dur: 0.3 }, { note: "B4", dur: 0.3 }, { note: "C#5", dur: 0.3 },
+                            { note: "F#4", dur: 0.6 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "2024", title: "Frontier AI Models", desc: "Multi-modal foundation models process voice, text, and visual inputs in real-time." },
+                    { year: "2024", title: "Solid-State Battery Progress", desc: "Early commercial prototypes double the energy density of electric vehicles." },
+                    { year: "2024", title: "Commercial Quantum Access", desc: "Cloud platforms provide public API access to early quantum processors." }
+                ]
+            },
+            {
+                year: "2026",
+                title: "2026: The Modern Frontier",
+                musicLabel: "Modern Chart-Topping Pop Anthems",
+                tempo: 120,
+                baseFreq: 140,
+                leadFreq: 280,
+                themeClass: "font-t2050",
+                keyInvention: "Ubiquitous Neural Copilots",
+                fuelSource: "Fusion Power Plants & Solar Grids",
+                palette: "Futuristic Violet, Holographic Silver, Slate",
+                overview: `In 2026, music and technology exist in perfect harmony. Creative workflows are enhanced by intelligent copilots, while pop music celebrates human connection through upbeat, organic rhythms.`,
+                techDetail: `GPU clusters and customized accelerators process complex models in milliseconds, serving as intuitive partners in creative and technical workflows.`,
+                rapRomance: "A rich, vibrant electronic arrangement. Pulsing, calculated synthesizer leads play alongside driving, danceable rhythms.",
+                spotlightTitle: "Intelligent Neural Copilots (2026)",
+                spotlightText: "Software agents collaborate seamlessly with engineers and artists, accelerating development and creative cycles.",
+                bgColor: "#090514",
+                particleColor: "#a78bfa",
+                songs: [
+                    {
+                        year: "2024",
+                        title: "Beautiful Things",
+                        artist: "Benson Boone",
+                        genre: "Alternative Pop",
+                        impact: "A massive alternative pop ballad that balances quiet, intimate verses with a explosive, emotional rock chorus.",
+                        notes: [
+                            { note: "G4", dur: 0.4 }, { note: "B4", dur: 0.2 }, { note: "D5", dur: 0.4 }, { note: "C5", dur: 0.2 },
+                            { note: "B4", dur: 0.8 }
+                        ]
+                    },
+                    {
+                        year: "2023",
+                        title: "Flowers",
+                        artist: "Miley Cyrus",
+                        genre: "Disco Pop",
+                        impact: "Miley's Grammy-winning disco-pop anthem of self-empowerment, setting records as the fastest song to hit 1 billion streams.",
+                        notes: [
+                            { note: "A4", dur: 0.3 }, { note: "C5", dur: 0.3 }, { note: "D5", dur: 0.3 }, { note: "C5", dur: 0.6 },
+                            { note: "A4", dur: 0.6 }
+                        ]
+                    },
+                    {
+                        year: "2023",
+                        title: "Cruel Summer",
+                        artist: "Taylor Swift",
+                        genre: "Synth-Pop",
+                        impact: "A fan-favorite synth-pop masterpiece that dominated charts worldwide during her historic global Eras Tour.",
+                        notes: [
+                            { note: "E4", dur: 0.2 }, { note: "G4", dur: 0.2 }, { note: "A4", dur: 0.2 }, { note: "G4", dur: 0.2 },
+                            { note: "C5", dur: 0.4 }, { note: "A4", dur: 0.4 }
+                        ]
+                    }
+                ],
+                timeline: [
+                    { year: "2026", title: "Intelligent Copilots", desc: "Collaborative agents assist developers, creators, and professionals worldwide." },
+                    { year: "2026", title: "Next-Gen Clean Energy", desc: "Advanced fusion and solar grids begin supply power to high-capacity networks." },
+                    { year: "2026", title: "Unified Chronosphere", desc: "Humanity's historical database, music archives, and technical achievements are safely secured." }
+                ]
+            }
+        ];
+
+        // --- GLOBAL APP STATE ---
+        let activeDecadeIndex = 7; // Start at 1980s for premium aesthetic
+        let isDarkMode = true;
+        let isMuted = true;
+        let playTimerSec = 0;
+        let audioCtx = null;
+        let masterGain = null;
+        let delayNode = null;
+        let noteTimeout = null;
+
+        // Visual Canvas State
+        const canvas = document.getElementById("bgCanvas");
+        const ctx = canvas.getContext("2d");
+        let particles = [];
+        let animationFrameId = null;
+
+        // Note frequencies lookup
+        const NOTE_FREQS = {
+            "C3": 130.81, "C#3": 138.59, "D3": 146.83, "Eb3": 155.56, "E3": 164.81, "F3": 174.61, "F#3": 185.00, "G3": 196.00, "Ab3": 207.65, "A3": 220.00, "Bb3": 233.08, "B3": 246.94,
+            "C4": 261.63, "C#4": 277.18, "D4": 293.66, "D#4": 311.13, "E4": 329.63, "F4": 349.23, "F#4": 369.99, "G4": 392.00, "Ab4": 415.30, "A4": 440.00, "Bb4": 466.16, "B4": 493.88,
+            "C5": 523.25, "C#5": 554.37, "D5": 587.33, "D#5": 622.25, "E5": 659.25, "F5": 698.46, "F#5": 739.99, "G5": 783.99, "Ab5": 830.61, "A5": 880.00, "Bb5": 932.33, "B5": 987.77,
+            "C6": 1046.50
+        };
+
+        // --- CORE AUDIO SYSTEM ---
+        function initAudio() {
+            if (audioCtx) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Signal Chain: Synth -> Delay -> Master -> Out
+                delayNode = audioCtx.createDelay(1.0);
+                delayNode.delayTime.setValueAtTime(0.35, audioCtx.currentTime);
+                
+                const delayFeedback = audioCtx.createGain();
+                delayFeedback.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                
+                delayNode.connect(delayFeedback);
+                delayFeedback.connect(delayNode);
+                
+                masterGain = audioCtx.createGain();
+                masterGain.gain.setValueAtTime(isMuted ? 0 : 0.4, audioCtx.currentTime);
+                
+                delayNode.connect(masterGain);
+                masterGain.connect(audioCtx.destination);
+            } catch (e) {
+                console.error("Web Audio API not supported in this environment.", e);
+            }
+        }
+
+        function playSynthNote(noteName, duration) {
+            if (!audioCtx || isMuted) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const frequency = NOTE_FREQS[noteName] || 440;
+            const now = audioCtx.currentTime;
+
+            // Dual Oscillator Synthesis (Warmth + Edge)
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const synthGain = audioCtx.createGain();
+
+            // Dynamic waveshaping based on era selection
+            const activeEra = DECADE_DATABASE[activeDecadeIndex];
+            const yearNum = parseInt(activeEra.year);
+
+            if (yearNum < 1930) {
+                // Brass/Acoustic warm imitation
+                osc1.type = 'triangle';
+                osc2.type = 'sine';
+            } else if (yearNum < 1970) {
+                // Retro organic tubes
+                osc1.type = 'sine';
+                osc2.type = 'triangle';
+            } else if (yearNum < 2000) {
+                // Classic square-wave and sawtooth synths
+                osc1.type = 'square';
+                osc2.type = 'sawtooth';
+            } else {
+                // Modern complex bright digital structures
+                osc1.type = 'sawtooth';
+                osc2.type = 'triangle';
+            }
+
+            osc1.frequency.setValueAtTime(frequency, now);
+            osc2.frequency.setValueAtTime(frequency * 1.005, now); // Detune for chorus width
+
+            synthGain.gain.setValueAtTime(0, now);
+            synthGain.gain.linearRampToValueAtTime(0.25, now + 0.02); // Attack
+            synthGain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Decay/Sustain
+
+            osc1.connect(synthGain);
+            osc2.connect(synthGain);
+            
+            synthGain.connect(audioCtx.destination);
+            synthGain.connect(delayNode);
+
+            osc1.start(now);
+            osc2.start(now);
+            
+            osc1.stop(now + duration);
+            osc2.stop(now + duration);
+
+            // Animate local audio bars procedural reaction
+            const bars = document.querySelectorAll(".wave-bar");
+            bars.forEach(bar => {
+                const randomHeight = Math.floor(Math.random() * 12) + 4;
+                bar.style.height = `${randomHeight}px`;
+                setTimeout(() => { bar.style.height = '4px'; }, duration * 1000);
+            });
+        }
+
+        // Play sequence of notes representing our classic songs
+        function playSongMelody(notes) {
+            if (!audioCtx) initAudio();
+            if (isMuted) {
+                toggleMute(); // Auto unmute when actively testing song melodies
+            }
+
+            // Cancel prior notes
+            if (noteTimeout) clearTimeout(noteTimeout);
+
+            let accumulatedDelay = 0;
+            notes.forEach((noteData, idx) => {
+                noteTimeout = setTimeout(() => {
+                    playSynthNote(noteData.note, noteData.dur * 1.5);
+                    document.getElementById("nowPlayingText").textContent = `Synthesizing ${noteData.note}...`;
+                }, accumulatedDelay);
+                accumulatedDelay += noteData.dur * 1200; // scaling to slower ms
+            });
+
+            // Re-label monitor status after sequence completes
+            setTimeout(() => {
+                const songTitle = document.getElementById("activePlayingSongTitle")?.textContent || "No Active Song";
+                document.getElementById("nowPlayingText").textContent = songTitle;
+            }, accumulatedDelay + 500);
+        }
+
+        function toggleMute() {
+            initAudio();
+            isMuted = !isMuted;
+            const muteIcon = document.getElementById("muteIcon");
+            
+            if (isMuted) {
+                muteIcon.className = "fa-solid fa-volume-xmark";
+                document.getElementById("nowPlayingText").textContent = "System Muted";
+                if (masterGain) masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            } else {
+                muteIcon.className = "fa-solid fa-volume-high text-green-500";
+                document.getElementById("nowPlayingText").textContent = "Synthesizer Ready";
+                if (masterGain) masterGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                playSynthNote("C5", 0.15); // Test tone indicator
+            }
+        }
+
+        // --- GLOBAL APP SPA ROUTER ---
+        function enterTimeMachine() {
+            document.getElementById("landingPage").classList.add("hidden");
+            document.getElementById("timeMachinePage").classList.remove("hidden");
+            initNavigationMenu();
+            loadDecadeContent(activeDecadeIndex);
+        }
+
+        function goHome() {
+            document.getElementById("timeMachinePage").classList.add("hidden");
+            document.getElementById("landingPage").classList.remove("hidden");
+        }
+
+        // Initialize left sidebar menu
+        function initNavigationMenu() {
+            const container = document.getElementById("decadeNavList");
+            container.innerHTML = "";
+            DECADE_DATABASE.forEach((item, idx) => {
+                const btn = document.createElement("button");
+                btn.className = `w-full text-left px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-between group ${idx === activeDecadeIndex ? 'bg-indigo-600 text-white font-bold border-l-4 border-fuchsia-500' : 'hover:bg-slate-200/50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300'}`;
+                btn.onclick = () => {
+                    activeDecadeIndex = idx;
+                    document.getElementById("decadeSlider").value = idx;
+                    updateNavigationSelection();
+                    loadDecadeContent(idx);
+                };
+                
+                const titleSpan = document.createElement("span");
+                titleSpan.textContent = item.year + (item.year.length === 4 && item.year.endsWith("0") ? "s" : "");
+                titleSpan.className = "font-semibold";
+
+                const icon = document.createElement("i");
+                icon.className = `fa-solid fa-chevron-right text-xs transition-transform group-hover:translate-x-1 ${idx === activeDecadeIndex ? 'text-white' : 'text-slate-400'}`;
+
+                btn.appendChild(titleSpan);
+                btn.appendChild(icon);
+                container.appendChild(btn);
+            });
+        }
+
+        function updateNavigationSelection() {
+            const buttons = document.getElementById("decadeNavList").querySelectorAll("button");
+            buttons.forEach((btn, idx) => {
+                if (idx === activeDecadeIndex) {
+                    btn.className = "w-full text-left px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-between group bg-indigo-600 text-white font-bold border-l-4 border-fuchsia-500";
+                    btn.querySelector("i").className = "fa-solid fa-chevron-right text-xs text-white";
+                } else {
+                    btn.className = "w-full text-left px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-between group hover:bg-slate-200/50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300";
+                    btn.querySelector("i").className = "fa-solid fa-chevron-right text-xs text-slate-400 group-hover:translate-x-1";
+                }
+            });
+        }
+
+        function onSliderChange(value) {
+            activeDecadeIndex = parseInt(value);
+            document.getElementById("sliderYearLabel").textContent = DECADE_DATABASE[activeDecadeIndex].year;
+            updateNavigationSelection();
+            loadDecadeContent(activeDecadeIndex);
+        }
+
+        // Load historical content cards and active jukebox records
+        function loadDecadeContent(index) {
+            const activeEra = DECADE_DATABASE[index];
+            
+            // Fonts & Labels
+            const view = document.getElementById("contentViewport");
+            view.className = `flex-1 p-6 md:p-12 overflow-y-auto max-h-[calc(100vh-5rem)] ${activeEra.themeClass}`;
+            
+            document.getElementById("decadeTitle").textContent = activeEra.title;
+            document.getElementById("eraMusicLabel").textContent = activeEra.musicLabel;
+            document.getElementById("keyInventionText").textContent = activeEra.keyInvention;
+            document.getElementById("fuelSourceText").textContent = activeEra.fuelSource;
+            document.getElementById("aestheticPalette").textContent = activeEra.palette;
+            
+            document.getElementById("epochOverview").innerHTML = `<p>${activeEra.overview}</p>`;
+            document.getElementById("techMainBlock").innerHTML = `<p>${activeEra.techDetail}</p>`;
+            document.getElementById("rapRomanceSection").innerHTML = `<p><i class="fa-solid fa-quote-left mr-2"></i>${activeEra.rapRomance}</p>`;
+            
+            document.getElementById("spotlightTitle").textContent = activeEra.spotlightTitle;
+            document.getElementById("spotlightText").textContent = activeEra.spotlightText;
+
+            // Generate Jukebox Jars
+            const jukeboxContainer = document.getElementById("songCardsContainer");
+            jukeboxContainer.innerHTML = "";
+            activeEra.songs.forEach((song, sIdx) => {
+                const card = document.createElement("div");
+                card.className = "p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all group duration-300";
+                
+                const cardHeader = `
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-full font-bold">${song.year} Record</span>
+                            <span class="text-xs text-slate-400 font-mono">${song.genre}</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800 dark:text-white mt-1 group-hover:text-indigo-500 transition-colors">${song.title}</h4>
+                        <p class="text-xs text-slate-500 font-mono">by ${song.artist}</p>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">${song.impact}</p>
+                `;
+                
+                const playBtn = document.createElement("button");
+                playBtn.className = "w-full py-2 bg-slate-100 hover:bg-indigo-600 hover:text-white dark:bg-slate-800 dark:hover:bg-indigo-500 transition-all font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2";
+                playBtn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> Play Melody Synthesis`;
+                playBtn.onclick = () => {
+                    // Update active playing context indicator
+                    document.getElementById("nowPlayingText").textContent = `${song.title}`;
+                    playSongMelody(song.notes);
+                };
+
+                card.innerHTML = cardHeader;
+                card.appendChild(playBtn);
+                jukeboxContainer.appendChild(card);
+            });
+
+            // Generate Timeline Chronology Cards
+            const timelineContainer = document.getElementById("timelineCardsContainer");
+            timelineContainer.innerHTML = "";
+            activeEra.timeline.forEach(event => {
+                const card = document.createElement("div");
+                card.className = "p-4 bg-slate-100/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1.5";
+                card.innerHTML = `
+                    <span class="text-xs font-mono font-bold text-fuchsia-600 dark:text-fuchsia-400">${event.year}</span>
+                    <h4 class="text-sm font-bold text-slate-800 dark:text-white">${event.title}</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${event.desc}</p>
+                `;
+                timelineContainer.appendChild(card);
+            });
+
+            // Trigger Canvas background transition
+            reinitializeParticles(activeEra.bgColor, activeEra.particleColor);
+        }
+
+        // --- INTERACTIVE BACKGROUND CANVAS ENGINE ---
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        function reinitializeParticles(bgHex, pColorHex) {
+            particles = [];
+            const activeEra = DECADE_DATABASE[activeDecadeIndex];
+            const yearVal = parseInt(activeEra.year);
+            const numParticles = 40;
+
+            // Tailor particle types based on decade to symbolize historical progress
+            for (let i = 0; i < numParticles; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: (Math.random() - 0.5) * 1.5,
+                    size: Math.random() * 3 + 1,
+                    color: pColorHex,
+                    // Additional aesthetic nodes
+                    alpha: Math.random() * 0.5 + 0.2,
+                    char: yearVal >= 1990 ? String.fromCharCode(33 + Math.floor(Math.random() * 90)) : null // matrix / code fall
+                });
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const activeEra = DECADE_DATABASE[activeDecadeIndex];
+            const yearVal = parseInt(activeEra.year);
+
+            particles.forEach(p => {
+                // Classic dust float / code drop physics
+                if (yearVal >= 2020) {
+                    // High-tech vertical code matrix fall
+                    p.y += Math.abs(p.vy) * 2;
+                    if (p.y > canvas.height) {
+                        p.y = 0;
+                        p.x = Math.random() * canvas.width;
+                    }
+                } else {
+                    // Standard floating particles
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+
+                if (p.char && yearVal >= 1990) {
+                    // Render ASCII characters instead of circles
+                    ctx.font = "10px monospace";
+                    ctx.fillText(p.char, p.x, p.y);
+                    // Dynamic glitches
+                    if (Math.random() > 0.98) p.char = String.fromCharCode(33 + Math.floor(Math.random() * 90));
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            });
+
+            // Connect nearest nodes if late-stage web era (2000s onwards)
+            if (yearVal >= 2000) {
+                ctx.strokeStyle = activeEra.particleColor;
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+                        if (dist < 100) {
+                            ctx.save();
+                            ctx.globalAlpha = (1 - dist / 100) * 0.15;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    }
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(animateParticles);
+        }
+        animationFrameId = requestAnimationFrame(animateParticles);
+
+        // --- SYSTEM UTILITY OPERATIONS ---
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            const doc = document.documentElement;
+            const icon = document.getElementById("themeIcon");
+            if (isDarkMode) {
+                doc.classList.add("dark");
+                icon.className = "fa-solid fa-sun";
+            } else {
+                doc.classList.remove("dark");
+                icon.className = "fa-solid fa-moon";
+            }
+        }
+
+        // Live Voyager timer session tracker
+        setInterval(() => {
+            playTimerSec++;
+            const h = String(Math.floor(playTimerSec / 3600)).padStart(2, '0');
+            const m = String(Math.floor((playTimerSec % 3600) / 60)).padStart(2, '0');
+            const s = String(playTimerSec % 60).padStart(2, '0');
+            const timer = document.getElementById("liveTime");
+            if (timer) timer.textContent = `${h}:${m}:${s}`;
+        }, 1000);
+    </script>
+</body>
+</html>
